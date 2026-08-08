@@ -1,0 +1,30 @@
+{
+  "name": "npc-office",
+  "version": "1.0.0",
+  "description": "私人综合生活管理工作台 - Web + Android",
+  "main": "index.html",
+  "scripts": {
+    "build": "echo '纯静态,无需构建'",
+    "cap:init": "cap init io.npc.office \"NPC办事处\" --web-dir .",
+    "cap:add": "cap add android",
+    "cap:sync": "cap sync android",
+    "cap:open": "cap open android",
+    "cap:copy": "cap copy android"
+  },
+  "keywords": [
+    "supabase",
+    "pwa",
+    "capacitor",
+    "android",
+    "life-management"
+  ],
+  "author": "NPC办事处",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@capacitor/android": "^6.1.0",
+    "@capacitor/core": "^6.1.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.0"
+  }
+}
