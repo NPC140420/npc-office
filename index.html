@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#F7E9CC" />
+<title>NPC办事处</title>
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="assets/img/app-icon.jpg" />
+<link rel="apple-touch-icon" href="assets/img/app-icon.jpg" />
+<link rel="stylesheet" href="styles.css" />
+<style>
+  html, body { margin: 0; padding: 0; background: var(--bg); min-height: 100vh; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<!-- 登录页(初始显示) -->
+<script>
+(function bootLogin(){
+  const wrap = document.createElement('div');
+  wrap.className = 'auth-wrap';
+  wrap.innerHTML = `
+    <div class="auth-card">
+      <img class="avatar" src="assets/img/avatar-main.jpg" alt="NPC" />
+      <h1>NPC办事处</h1>
+      <p class="sub">私人专属 · 数据云端同步</p>
+      <div class="auth-tabs">
+        <button class="active" data-tab="login">登录</button>
+        <button data-tab="signup">注册</button>
+      </div>
+      <div id="auth-forms"></div>
+      <p class="auth-tip" id="auth-tip">登录即同意数据存储于 Supabase 云端,登录你的账号 = 看到你的数据。</p>
+    </div>
+  `;
+  document.getElementById('app').append(wrap);
+
+  function renderForms(tab){
+    const f = document.getElementById('auth-forms');
+    if (tab === 'login'){
+      f.innerHTML = `
+        <div class="auth-field"><label>邮箱</label><input id="lg-email" type="email" autocomplete="email" placeholder="you@example.com"/></div>
+        <div class="auth-field"><label>密码</label><input id="lg-pwd" type="password" autocomplete="current-password" placeholder="至少 6 位"/></div>
+        <button class="auth-submit" id="btn-login">登录</button>
+        <div class="auth-msg" id="msg"></div>
+        <p class="auth-tip"><a href="javascript:;" id="forgot">忘记密码?</a></p>
+      `;
+      bindLogin();
+    } else {
+      f.innerHTML = `
+        <div class="auth-field"><label>邮箱</label><input id="lg-email" type="email" autocomplete="email" placeholder="you@example.com"/></div>
+        <div class="auth-field"><label>密码(至少 6 位)</label><input id="lg-pwd" type="password" autocomplete="new-password" placeholder="设置密码"/></div>
+        <div class="auth-field"><label>昵称(可选)</label><input id="lg-nick" type="text" placeholder="给自己起个名字"/></div>
+        <button class="auth-submit" id="btn-signup">注册</button>
+        <div class="auth-msg" id="msg"></div>
+        <p class="auth-tip">注册后请查收邮箱完成验证(若开启)。</p>
+      `;
+      bindSignup();
+    }
+  }
+
+  function showMsg(text, type){
+    const m = document.getElementById('msg');
+    m.textContent = text;
+    m.className = 'auth-msg ' + (type||'');
+  }
+
+  async function getClient(){
+    const p = await window.NPC_SUPABASE();
+    return p;
+  }
+
+  async function bindLogin(){
+    document.getElementById('btn-login').onclick = async () => {
+      const email = document.getElementById('lg-email').value.trim();
+      const pwd = document.getElementById('lg-pwd').value;
+      if (!email || !pwd) return showMsg('请填邮箱和密码', 'error');
+      try {
+        const s = await getClient();
+        const { data, error } = await s.auth.signInWithPassword({ email, password: pwd });
+        if (error) return showMsg('登录失败:' + error.message, 'error');
+        showMsg('登录成功!正在进入...', 'ok');
+        setTimeout(() => window.NPC_APP.renderShell(), 600);
+      } catch(e){ showMsg('登录异常:' + e.message, 'error'); }
+    };
+    document.getElementById('forgot').onclick = async () => {
+      const email = document.getElementById('lg-email').value.trim();
+      if (!email) return showMsg('请先填邮箱', 'error');
+      try {
+        const s = await getClient();
+        const { error } = await s.auth.resetPasswordForEmail(email, { redirectTo: location.origin });
+        if (error) return showMsg(error.message, 'error');
+        showMsg('重置链接已发送到邮箱', 'ok');
+      } catch(e){ showMsg(e.message, 'error'); }
+    };
+  }
+
+  async function bindSignup(){
+    document.getElementById('btn-signup').onclick = async () => {
+      const email = document.getElementById('lg-email').value.trim();
+      const pwd = document.getElementById('lg-pwd').value;
+      const nick = document.getElementById('lg-nick').value.trim();
+      if (!email || !pwd) return showMsg('请填邮箱和密码', 'error');
+      if (pwd.length < 6) return showMsg('密码至少 6 位', 'error');
+      try {
+        const s = await getClient();
+        const { data, error } = await s.auth.signUp({ email, password: pwd, options: { data: { nickname: nick } } });
+        if (error) return showMsg('注册失败:' + error.message, 'error');
+        if (data.session){
+          showMsg('注册成功!进入中...', 'ok');
+          setTimeout(() => window.NPC_APP.renderShell(), 600);
+        } else {
+          showMsg('已发送验证邮件,请点击链接后再登录。', 'ok');
+        }
+      } catch(e){ showMsg('注册异常:' + e.message, 'error'); }
+    };
+  }
+
+  wrap.querySelectorAll('.auth-tabs button').forEach(b =>
+    b.addEventListener('click', () => {
+      wrap.querySelectorAll('.auth-tabs button').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      renderForms(b.dataset.tab);
+    })
+  );
+  renderForms('login');
+
+  // 自动检测已登录
+  (async () => {
+    try {
+      const s = await getClient();
+      const { data: { session } } = await s.auth.getSession();
+      if (session) window.NPC_APP.renderShell();
+    } catch(e){}
+  })();
+})();
+</script>
+
+<!-- 工具/SUPABASE/APP JS 加载顺序 -->
+<script src="utils.js"></script>
+<script src="supabase-client.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

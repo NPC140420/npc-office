@@ -1,0 +1,26 @@
+{
+  "name": "NPC办事处",
+  "short_name": "NPC办事处",
+  "description": "私人综合生活管理工作台",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F7E9CC",
+  "theme_color": "#6E8C52",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "assets/img/app-icon.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/img/app-icon.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
