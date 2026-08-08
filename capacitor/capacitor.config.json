@@ -1,0 +1,26 @@
+{
+  "appId": "io.npc.office",
+  "appName": "NPC办事处",
+  "webDir": ".",
+  "bundledWebRuntime": false,
+  "loggingBehavior": "production",
+  "android": {
+    "allowMixedContent": false,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false,
+    "backgroundColor": "#F7E9CCFF"
+  },
+  "server": {
+    "androidScheme": "https",
+    "cleartext": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1000,
+      "backgroundColor": "#F7E9CC",
+      "androidSplashResourceName": "splash",
+      "splashFullScreen": true,
+      "splashImmersive": false
+    }
+  }
+}
